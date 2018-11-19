@@ -1,0 +1,34 @@
+sudo: required
+services:
+  - docker
+
+# Building from dev file because we need to test run which can be done only by dev build
+before_install:
+  - docker build -t docker-react -f Dockerfile.dev
+
+script:
+  - docker run docker-react npm run test -- --coverage
+
+deploy:
+  provider: elasticbeanstalk
+  region: "us-west-2"
+  app: "docker-react"
+  env: "docker-react-env"
+  bucket_name: "elasticbeanstalk-us-west-2-73267382465"
+  bucket_path: "docker-react"
+  on:
+    branch: master
+  # Generate api keys on AWS by going to 'IAM'
+  # IAM -> Users -> Add User
+  # Enter name and select both in access part
+  # -> Permissions -> attach existing policies directly
+  # search 'beanstalk' select 'provide full acess in description'
+  # -> review -> create user
+  # copy access key and screct key
+
+  # Go to travis on our project and open settings
+  # Go environment variables
+  # Add two variables 1. AWS_ACCESS_KEY 2. AWS_SECRET_KEY
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key:
+      secure: "$AWS_SECRET_KEY"
